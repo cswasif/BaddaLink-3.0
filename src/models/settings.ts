@@ -1,6 +1,7 @@
 export enum ColorMode {
-  DARK = 'dark',
   LIGHT = 'light',
+  DARK = 'dark',
+  OCEANIC = 'oceanic',
 }
 
 const ColorModeValueStrings = Object.values(ColorMode).map(String)

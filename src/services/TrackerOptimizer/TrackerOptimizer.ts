@@ -36,9 +36,9 @@ export class TrackerOptimizer {
   private config: Required<TrackerOptimizerConfig>
 
   private readonly defaultConfig: Required<TrackerOptimizerConfig> = {
-    timeout: 3000,
-    maxTrackers: 3,
-    testInterval: 30000, // 30 seconds
+    timeout: 2000, // Reduced timeout for faster response
+    maxTrackers: 2, // Reduced to fewer trackers
+    testInterval: 60000, // Increased to 60 seconds to reduce frequency
     enableBackgroundScan: true,
     trackerOptimizerUrl:
       'https://tracker-optimizer.md-wasif-faisal.workers.dev',

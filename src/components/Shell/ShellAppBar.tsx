@@ -18,8 +18,10 @@ import Link from '@mui/icons-material/Link'
 import Menu from '@mui/icons-material/Menu'
 import QrCode2 from '@mui/icons-material/QrCode2'
 import RoomPreferences from '@mui/icons-material/RoomPreferences'
+import ExitToApp from '@mui/icons-material/ExitToApp'
 
 import { useContext } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { ShellContext } from 'contexts/ShellContext'
 
@@ -88,8 +90,14 @@ export const ShellAppBar = ({
 }: ShellAppBarProps) => {
   const theme = useTheme()
   const { peerList, isEmbedded, showRoomControls } = useContext(ShellContext)
+  const navigate = useNavigate()
   const handleQRCodeClick = () => setIsQRCodeDialogOpen(true)
   const onClickFullscreen = () => setIsFullscreen(!isFullscreen)
+  const handleExitRoom = () => {
+    if (window.confirm('Are you sure you want to exit this chat room?')) {
+      navigate('/')
+    }
+  }
 
   return (
     <>
@@ -191,6 +199,22 @@ export const ShellAppBar = ({
                 {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
               </IconButton>
             </Tooltip>
+            {isEmbedded ? null : (
+              <Tooltip title="Exit Chat Room">
+                <IconButton
+                  size="large"
+                  edge="end"
+                  color="inherit"
+                  aria-label="Exit chat room"
+                  onClick={handleExitRoom}
+                  sx={{
+                    ml: 1,
+                  }}
+                >
+                  <ExitToApp />
+                </IconButton>
+              </Tooltip>
+            )}
             <Tooltip title="Click to show peer list">
               <IconButton
                 size="large"

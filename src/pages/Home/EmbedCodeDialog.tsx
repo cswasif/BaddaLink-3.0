@@ -58,7 +58,7 @@ export const EmbedCodeDialog = ({
 
   return (
     <Dialog open={showEmbedCode} onClose={handleEmbedCodeWindowClose}>
-      <DialogTitle>Embedding Chitchatter</DialogTitle>
+      <DialogTitle>Embedding BaddaLink</DialogTitle>
       <DialogContent>
         <DialogContentText
           sx={{
@@ -107,7 +107,7 @@ export const EmbedCodeDialog = ({
             href="https://github.com/jeremyckahn/chitchatter#SDK"
             target="_blank"
           >
-            Chitchatter SDK
+            BaddaLink SDK
           </Link>{' '}
           to embed a chat room as a{' '}
           <Link

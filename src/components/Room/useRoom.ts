@@ -59,7 +59,11 @@ interface UserMetadata extends Record<string, any> {
 }
 
 export function useRoom(
-  { password, ...roomConfig }: RoomConfig,
+  {
+    password,
+    optimizedTrackerUrls,
+    ...roomConfig
+  }: RoomConfig & { optimizedTrackerUrls?: string[] },
   {
     roomId,
     userId,
@@ -114,8 +118,8 @@ export function useRoom(
   const { getDisplayUsername } = usePeerNameDisplay()
 
   const fileTransferService = useMemo(
-    () => new FileTransferService(roomConfig.rtcConfig!),
-    [roomConfig.rtcConfig]
+    () => new FileTransferService(roomConfig.rtcConfig!, optimizedTrackerUrls),
+    [roomConfig.rtcConfig, optimizedTrackerUrls]
   )
 
   const setMessageLog = (messages: Array<Message | InlineMedia>) => {

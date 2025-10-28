@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TURN Server Test - Standalone</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .test-config {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 10px 0;
+        border-left: 4px solid #007bff;
+      }
+      .log-entry {
+        padding: 5px 10px;
+        margin: 2px 0;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 12px;
+      }
+      .log-info {
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+      .log-success {
+        background: #e8f5e8;
+        color: #2e7d32;
+      }
+      .log-error {
+        background: #ffebee;
+        color: #c62828;
+      }
+      .log-warning {
+        background: #fff3e0;
+        color: #f57c00;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+      .status-success {
+        background: #4caf50;
+      }
+      .status-error {
+        background: #f44336;
+      }
+      .status-warning {
+        background: #ff9800;
+      }
+      .status-info {
+        background: #2196f3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔄 TURN Server Test - Standalone</h1>
+      <p>
+        This page tests TURN server connectivity using different configurations
+        to force TURN usage.
+      </p>
+
+      <div class="test-config">
+        <h3>Test Configurations:</h3>
+        <ul>
+          <li><strong>TURN-Only:</strong> Forces relay connections only</li>
+          <li>
+            <strong>TURN-Prioritized:</strong> Prefers TURN but allows fallback
+          </li>
+          <li>
+            <strong>Current Config:</strong> Tests with live configuration
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <button onclick="testTurnOnly()">Test TURN-Only</button>
+        <button onclick="testTurnPrioritized()">Test TURN-Prioritized</button>
+        <button onclick="testCurrentConfig()">Test Current Config</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+      </div>
+
+      <div id="results">
+        <h3>Test Results:</h3>
+        <div id="logs"></div>
+      </div>
+    </div>
+
+    <script>
+      // TURN server configurations
+      const testTurnOnlyConfig = {
+        iceServers: [
+          {
+            urls: [
+              'turn:bn-turn1.xirsys.com:80?transport=udp',
+              'turn:bn-turn1.xirsys.com:3478?transport=udp',
+              'turn:bn-turn1.xirsys.com:80?transport=tcp',
+              'turn:bn-turn1.xirsys.com:3478?transport=tcp',
+              'turns:bn-turn1.xirsys.com:443?transport=tcp',
+              'turns:bn-turn1.xirsys.com:5349?transport=tcp',
+            ],
+            username:
+              'nZ9q6GUDRXlIfz_L2ChN4gn7YLjKsYjmGtdZjUHE4LD7_JkKT1t79vF81IBqApLAAAAAAAAA',
+            credential: 'ad044dc6-b36c-11f0-b302-0242ac140004',
+          },
+        ],
+        iceTransportPolicy: 'relay', // This forces TURN usage
+      }
+
+      const testTurnPrioritizedConfig = {
+        iceServers: [
+          {
+            urls: [
+              'turn:bn-turn1.xirsys.com:80?transport=udp',
+              'turn:bn-turn1.xirsys.com:3478?transport=udp',
+              'turn:bn-turn1.xirsys.com:80?transport=tcp',
+              'turn:bn-turn1.xirsys.com:3478?transport=tcp',
+              'turns:bn-turn1.xirsys.com:443?transport=tcp',
+              'turns:bn-turn1.xirsys.com:5349?transport=tcp',
+            ],
+            username:
+              'nZ9q6GUDRXlIfz_L2ChN4gn7YLjKsYjmGtdZjUHE4LD7_JkKT1t79vF81IBqApLAAAAAAAAA',
+            credential: 'ad044dc6-b36c-11f0-b302-0242ac140004',
+          },
+          {
+            urls: ['stun:stun.cloudflare.com:3478'],
+          },
+          {
+            urls: ['stun:stun.l.google.com:19302'],
+          },
+        ],
+      }
+
+      // Logging function
+      function log(message, type = 'info') {
+        const logsDiv = document.getElementById('logs')
+        const logEntry = document.createElement('div')
+        logEntry.className = `log-entry log-${type}`
+
+        const timestamp = new Date().toLocaleTimeString()
+        const statusIcon = `<span class="status-indicator status-${type}"></span>`
+
+        logEntry.innerHTML = `${statusIcon}[${timestamp}] ${message}`
+        logsDiv.appendChild(logEntry)
+
+        // Auto-scroll to bottom
+        logsDiv.scrollTop = logsDiv.scrollHeight
+      }
+
+      // Clear logs
+      function clearLogs() {
+        document.getElementById('logs').innerHTML = ''
+      }
+
+      // Test TURN connectivity
+      async function testTurnConnectivity(config, testName) {
+        log(`Starting ${testName} test...`, 'info')
+
+        return new Promise(resolve => {
+          const pc = new RTCPeerConnection(config)
+          const startTime = Date.now()
+          let turnServerUsed = false
+          let candidateCount = 0
+
+          // Create a data channel to trigger ICE gathering
+          try {
+            pc.createDataChannel('test')
+            log('Created data channel for ICE gathering', 'info')
+          } catch (error) {
+            log(`Failed to create data channel: ${error.message}`, 'error')
+            resolve({
+              success: false,
+              error: error.message,
+              duration: Date.now() - startTime,
+            })
+            return
+          }
+
+          // Listen for ICE candidates
+          pc.onicecandidate = event => {
+            if (event.candidate) {
+              candidateCount++
+              const candidate = event.candidate
+              log(
+                `ICE candidate #${candidateCount}: ${candidate.candidate}`,
+                'info'
+              )
+
+              // Check if this is a TURN/relay candidate
+              if (candidate.candidate.includes('typ relay')) {
+                turnServerUsed = true
+                log(
+                  '🎉 TURN server detected! Found relay candidate.',
+                  'success'
+                )
+              }
+
+              // Check candidate type
+              if (candidate.candidate.includes('typ host')) {
+                log('Local host candidate found', 'info')
+              } else if (candidate.candidate.includes('typ srflx')) {
+                log('STUN server candidate found', 'info')
+              } else if (candidate.candidate.includes('typ relay')) {
+                log('TURN relay candidate found', 'success')
+              }
+            }
+          }
+
+          // Handle ICE gathering state changes
+          pc.onicegatheringstatechange = () => {
+            log(`ICE gathering state: ${pc.iceGatheringState}`, 'info')
+
+            if (pc.iceGatheringState === 'complete') {
+              const duration = Date.now() - startTime
+
+              // Close the peer connection
+              pc.close()
+
+              if (turnServerUsed) {
+                log(
+                  `✅ ${testName} test PASSED! TURN server is working.`,
+                  'success'
+                )
+                log(
+                  `Test completed in ${duration}ms with ${candidateCount} candidates`,
+                  'success'
+                )
+                resolve({
+                  success: true,
+                  turnServerUsed: true,
+                  duration,
+                  candidateCount,
+                })
+              } else {
+                if (config.iceTransportPolicy === 'relay') {
+                  log(
+                    `❌ ${testName} test FAILED! No TURN server candidates found.`,
+                    'error'
+                  )
+                  log(
+                    'This could mean the TURN server is unreachable or credentials are incorrect.',
+                    'error'
+                  )
+                } else {
+                  log(
+                    `⚠️ ${testName} test completed but no TURN server was used.`,
+                    'warning'
+                  )
+                  log(
+                    'This might be normal if direct P2P connection is possible.',
+                    'warning'
+                  )
+                }
+                resolve({
+                  success: false,
+                  turnServerUsed: false,
+                  duration,
+                  candidateCount,
+                })
+              }
+            }
+          }
+
+          // Handle connection state changes
+          pc.onconnectionstatechange = () => {
+            log(`Connection state: ${pc.connectionState}`, 'info')
+          }
+
+          // Create offer to start ICE gathering
+          pc.createOffer()
+            .then(offer => {
+              log('Created offer, setting local description...', 'info')
+              return pc.setLocalDescription(offer)
+            })
+            .then(() => {
+              log('Local description set, waiting for ICE gathering...', 'info')
+            })
+            .catch(error => {
+              log(`Error during offer creation: ${error.message}`, 'error')
+              pc.close()
+              resolve({
+                success: false,
+                error: error.message,
+                duration: Date.now() - startTime,
+              })
+            })
+
+          // Timeout after 10 seconds
+          setTimeout(() => {
+            if (pc.iceGatheringState !== 'complete') {
+              log('Test timed out after 10 seconds', 'error')
+              pc.close()
+              resolve({
+                success: false,
+                error: 'Timeout',
+                duration: Date.now() - startTime,
+              })
+            }
+          }, 10000)
+        })
+      }
+
+      // Test functions
+      async function testTurnOnly() {
+        log('=== Testing TURN-Only Configuration ===', 'info')
+        const result = await testTurnConnectivity(
+          testTurnOnlyConfig,
+          'TURN-Only'
+        )
+        log(
+          `Result: ${result.success ? 'SUCCESS' : 'FAILED'}`,
+          result.success ? 'success' : 'error'
+        )
+      }
+
+      async function testTurnPrioritized() {
+        log('=== Testing TURN-Prioritized Configuration ===', 'info')
+        const result = await testTurnConnectivity(
+          testTurnPrioritizedConfig,
+          'TURN-Prioritized'
+        )
+        log(
+          `Result: ${result.success ? 'SUCCESS' : 'FAILED'}`,
+          result.success ? 'success' : 'error'
+        )
+      }
+
+      async function testCurrentConfig() {
+        log('=== Testing with Current Configuration ===', 'info')
+
+        // Try to fetch current configuration
+        try {
+          log('Attempting to fetch current TURN configuration...', 'info')
+          const response = await fetch('/api/get-config')
+
+          if (response.ok) {
+            const turnServer = await response.json()
+            log('Successfully fetched TURN configuration', 'success')
+            log(`TURN server: ${turnServer.urls}`, 'info')
+
+            const currentConfig = {
+              iceServers: [turnServer],
+            }
+
+            const result = await testTurnConnectivity(
+              currentConfig,
+              'Current Config'
+            )
+            log(
+              `Result: ${result.success ? 'SUCCESS' : 'FAILED'}`,
+              result.success ? 'success' : 'error'
+            )
+          } else {
+            log(
+              `Failed to fetch configuration: ${response.status} ${response.statusText}`,
+              'error'
+            )
+            log('Falling back to hardcoded configuration...', 'warning')
+
+            const result = await testTurnConnectivity(
+              testTurnPrioritizedConfig,
+              'Fallback Config'
+            )
+            log(
+              `Fallback result: ${result.success ? 'SUCCESS' : 'FAILED'}`,
+              result.success ? 'success' : 'error'
+            )
+          }
+        } catch (error) {
+          log(`Error fetching configuration: ${error.message}`, 'error')
+          log('Using hardcoded configuration...', 'warning')
+
+          const result = await testTurnConnectivity(
+            testTurnPrioritizedConfig,
+            'Hardcoded Config'
+          )
+          log(
+            `Hardcoded result: ${result.success ? 'SUCCESS' : 'FAILED'}`,
+            result.success ? 'success' : 'error'
+          )
+        }
+      }
+
+      // Auto-run a test on page load
+      window.addEventListener('load', () => {
+        log('Page loaded. Ready to test TURN connectivity.', 'info')
+        log('Click one of the test buttons above to begin.', 'info')
+      })
+    </script>
+  </body>
+</html>

@@ -24,7 +24,7 @@ export const useHome = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    setTitle('Chitchatter')
+    setTitle('BaddaLink')
   }, [setTitle])
 
   const handleRoomNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {

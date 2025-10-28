@@ -1,23 +1,26 @@
-import { SettingsContext } from 'contexts/SettingsContext'
-import { useContext, useMemo } from 'react'
+import { useMemo } from 'react'
 import { createTheme } from '@mui/material/styles'
+import { useMediaQuery } from '@mui/material'
+import { SettingsContext } from 'contexts/SettingsContext'
+import { ColorMode } from 'models/settings'
+import { oceanicThemeTokens, oceanicThemeDarkTokens } from 'styles/purpleTheme'
+import { useContext } from 'react'
 
 export const useShellTheme = () => {
   const { getUserSettings } = useContext(SettingsContext)
   const { colorMode } = getUserSettings()
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
 
-  const theme = useMemo(
-    () =>
-      // NOTE: You can make theme customizations here. It is recommended to use
-      // the default theme viewer as a reference:
-      // https://mui.com/material-ui/customization/default-theme/
-      createTheme({
-        palette: {
-          mode: colorMode,
-        },
-      }),
-    [colorMode]
-  )
-
-  return theme
+  return useMemo(() => {
+    if (colorMode === ColorMode.OCEANIC) {
+      return createTheme(
+        prefersDarkMode ? oceanicThemeDarkTokens : oceanicThemeTokens
+      )
+    }
+    return createTheme({
+      palette: {
+        mode: colorMode === ColorMode.DARK ? 'dark' : 'light',
+      },
+    })
+  }, [colorMode, prefersDarkMode])
 }

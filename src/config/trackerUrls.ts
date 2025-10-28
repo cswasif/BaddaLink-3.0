@@ -1,4 +1,17 @@
 let trackerUrls: string[] | undefined = [
+  // 🚀 ENHANCED TRACKERS for better peer discovery and connection reliability
+  // Primary: Enhanced Cloudflare tracker (works better for localhost)
+  // 'wss://baddalink-tracker-enhanced.md-wasif-faisal.workers.dev',
+  // Fallback: Standard WebTorrent trackers
+  'wss://tracker.openwebtorrent.com',
+  'wss://tracker.openwebtorrent.com:443/announce',
+
+  // Additional trackers for redundancy
+  'wss://tracker.files.fm:7073/announce',
+  'wss://tracker.btorrent.xyz',
+  'wss://tracker.novage.com.ua:9443/announce',
+  'wss://tracker.openwebtorrent.com:443/announce',
+
   // If you would like to host your own Chitchatter instance with alternative
   // WebTorrent trackers to connect peers, add them to this array. This array
   // gets provided to Trystero as the `trackerUrls` configuration option:

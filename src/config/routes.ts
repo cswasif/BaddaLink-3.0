@@ -6,6 +6,7 @@ export enum routes {
   PUBLIC_ROOM = '/public/:roomId',
   ROOT = '/',
   SETTINGS = '/settings',
+  TURN_TEST = '/test-turn',
 }
 
 export const homepageUrl = new URL(

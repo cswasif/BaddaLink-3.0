@@ -87,6 +87,15 @@ export function useOptimizedStunConfig(
       return optimizedConfig
     }, [turnConfig])
 
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: QUERY_KEY,
+    queryFn: optimizeStunServers,
+    enabled: enabled && !!optimizerRef.current && !isTurnLoading,
+    staleTime: STUN_OPTIMIZER_CONFIG.testInterval,
+    retry: 1,
+    retryDelay: 2000,
+  })
+
   const forceReoptimize = useCallback(async () => {
     if (!optimizerRef.current) return
 
@@ -106,16 +115,7 @@ export function useOptimizedStunConfig(
     } finally {
       setIsReoptimizing(false)
     }
-  }, [turnConfig])
-
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: QUERY_KEY,
-    queryFn: optimizeStunServers,
-    enabled: enabled && !!optimizerRef.current && !isTurnLoading,
-    staleTime: STUN_OPTIMIZER_CONFIG.testInterval,
-    retry: 1,
-    retryDelay: 2000,
-  })
+  }, [turnConfig, refetch])
 
   // Create RTC configuration from optimized STUN servers
   const rtcConfig = data?.iceServers

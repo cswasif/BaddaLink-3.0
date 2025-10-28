@@ -46,9 +46,9 @@ import { Buffer } from 'buffer'
  * @type RTCIceServer
  */
 const fallbackTurnServer = {
-  urls: ['turn:relay1.expressturn.com:3478'],
-  username: 'efQUQ79N77B5BNVVKF',
-  credential: 'N4EAUgpjMzPLrxSS',
+  urls: ['turn:relay1.expressturn.com:3480'],
+  username: '000000002073803445',
+  credential: '3iSwN8gOD2f0gLPEIw3MJCm6sRw=',
 }
 
 // Validate that the decoded data conforms to RTCConfiguration interface
@@ -104,12 +104,12 @@ function getRtcConfig() {
 
   if (!rtcConfigEnv) {
     if (!process.env.IS_E2E_TEST) {
-      console.error(
-        'RTC_CONFIG environment variable is not set. Using fallback configuration.'
+      console.log(
+        'RTC_CONFIG environment variable is not set. Returning null for STUN-only mode.'
       )
     }
 
-    return fallbackTurnServer
+    return null
   }
 
   try {
@@ -135,10 +135,10 @@ function getRtcConfig() {
       return turnServer
     }
 
-    console.error(
-      'No TURN server found in RTC_CONFIG environment variable. Using fallback configuration.'
+    console.log(
+      'No TURN server found in RTC_CONFIG environment variable. Returning null for STUN-only mode.'
     )
-    return fallbackTurnServer
+    return null
   } catch (error) {
     if (error instanceof SyntaxError) {
       console.error(

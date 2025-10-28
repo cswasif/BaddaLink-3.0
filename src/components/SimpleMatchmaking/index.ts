@@ -1,0 +1,1 @@
+export { SimpleMatchmakingButton } from './SimpleMatchmakingButton'

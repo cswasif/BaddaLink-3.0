@@ -10,10 +10,17 @@ export const rtcConfig: RTCConfiguration = {
   // CHITCHATTER PEERS MAY NOT BE ABLE TO CONNECT DEPENDING ON HOW THEY ARE
   // CONNECTED TO THE INTERNET.
   iceServers: [
+    // STUN servers for direct connections (primary)
+    { urls: ['stun:stun.cloudflare.com:3478'] },
+    { urls: ['stun:stun.l.google.com:19302'] },
+    { urls: ['stun:stun1.l.google.com:19302'] },
+    { urls: ['stun:stun2.l.google.com:19302'] },
+    { urls: ['stun:stun.services.mozilla.com'] },
+    // TURN server for fallback when STUN fails
     {
-      urls: ['turn:relay1.expressturn.com:3478'],
-      username: 'efQUQ79N77B5BNVVKF',
-      credential: 'N4EAUgpjMzPLrxSS',
+      urls: ['turn:relay1.expressturn.com:3480'],
+      username: '000000002073803445',
+      credential: '3iSwN8gOD2f0gLPEIw3MJCm6sRw=',
     },
   ],
 }

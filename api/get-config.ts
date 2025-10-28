@@ -1,52 +1,15 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-
 /**
- * TURN Server Configuration Handler
+ * Cloudflare Pages Function - Get TURN Configuration
  *
- * This handler loads TURN server configuration from the RTC_CONFIG environment variable.
- * The environment variable should contain a base64-encoded JSON string that includes
- * the full RTCConfiguration, but this endpoint extracts and returns only the TURN server.
- *
- * To create the environment variable:
- *
- * RECOMMENDED: Use the helper script to generate the configuration:
- * 1. Run: npm run generate-rtc-config
- * 2. Follow the interactive prompts to configure TURN servers
- * 3. Copy the generated base64 string and set as RTC_CONFIG environment variable
- *
- * ALTERNATIVE: Manual creation:
- * 1. Create your RTCConfiguration object as JSON (including TURN servers)
- * 2. Base64 encode it: Buffer.from(JSON.stringify(config)).toString('base64')
- * 3. Set RTC_CONFIG="<base64-encoded-string>"
- *
- * Example:
- * const config = {
- *   iceServers: [
- *     { urls: 'turn:example.com:3478', username: 'user', credential: 'pass' }
- *   ]
- * }
- * RTC_CONFIG="eyJpY2VTZXJ2ZXJzIjpb..."
- *
- * The endpoint will return only the TURN server configuration:
- * { urls: 'turn:example.com:3478', username: 'user', credential: 'pass' }
- *
- * If the environment variable is missing, malformed, or invalid, the handler
- * will fall back to the default TURN server configuration.
- *
- * CORS SECURITY:
- * By default, this endpoint restricts cross-origin requests to allowed domains only.
- * For debugging purposes, you can override this by setting CORS_ALLOW_ALL="true"
- * to allow requests from any origin (INSECURE - use only for debugging).
+ * This function returns the TURN server configuration from the RTC_CONFIG environment variable.
+ * The environment variable should contain a base64-encoded JSON string with the full RTCConfiguration.
  */
 
-// Fallback TURN server configuration in case environment variable is missing or invalid
-// 🔒 SECURITY NOTE: These are example credentials for demonstration purposes only.
-// In production, you should replace these with your own TURN server credentials
-// or ensure that RTC_CONFIG environment variable is properly configured.
-const fallbackTurnServer: RTCIceServer = {
-  urls: ['turn:relay1.expressturn.com:3478'],
-  username: 'efQUQ79N77B5BNVVKF',
-  credential: 'N4EAUgpjMzPLrxSS',
+// Fallback TURN server configuration
+const fallbackTurnServer = {
+  urls: ['turn:relay1.expressturn.com:3480'],
+  username: '000000002073803445',
+  credential: '3iSwN8gOD2f0gLPEIw3MJCm6sRw=',
 }
 
 // Validate URL format for TURN servers
@@ -54,8 +17,8 @@ const isValidIceServerUrl = (url: string): boolean => {
   return /^(turn|turns):.+/.test(url)
 }
 
-// Validate that the decoded data conforms to RTCConfiguration interface
-const isValidRTCConfiguration = (data: any): data is RTCConfiguration => {
+// Validate RTCConfiguration
+const isValidRTCConfiguration = (data: any): boolean => {
   if (!data || typeof data !== 'object') {
     console.error('RTC configuration is not a valid object')
     return false
@@ -78,7 +41,6 @@ const isValidRTCConfiguration = (data: any): data is RTCConfiguration => {
       return false
     }
 
-    // urls is required and can be string or string[]
     if (!server.urls) {
       console.error('Ice server missing urls property')
       return false
@@ -100,7 +62,6 @@ const isValidRTCConfiguration = (data: any): data is RTCConfiguration => {
       return false
     }
 
-    // username and credential are optional but if present must be strings
     if (server.username !== undefined && typeof server.username !== 'string') {
       console.error('Ice server username must be a string')
       return false
@@ -139,8 +100,8 @@ const extractTurnServer = (
 }
 
 // Load and extract TURN server from environment variable
-const getTurnServer = (): RTCIceServer => {
-  const rtcConfigEnv = process.env.RTC_CONFIG
+const getTurnServer = (env: any): RTCIceServer => {
+  const rtcConfigEnv = env.RTC_CONFIG
 
   if (!rtcConfigEnv) {
     console.warn(
@@ -158,7 +119,7 @@ const getTurnServer = (): RTCIceServer => {
 
   try {
     // Base64 decode the environment variable
-    const decodedConfig = Buffer.from(rtcConfigEnv, 'base64').toString('utf-8')
+    const decodedConfig = atob(rtcConfigEnv)
 
     if (!decodedConfig.trim()) {
       console.error(
@@ -212,53 +173,52 @@ const allowedOrigins = [
   'https://chitchatter.im',
   'https://chitchatter.vercel.app',
   'https://chitchatter-git-develop-jeremyckahn.vercel.app',
-  'http://localhost:3000', // Development frontend
-  'http://localhost:3001', // API development
-  'http://localhost:3003', // Simple API server
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3003',
 ]
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  console.log(`API handler called with method: ${req.method}`)
+export const onRequestGet = async (context: { request: Request; env: any }) => {
+  console.log('API handler called for TURN configuration')
 
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    console.log(`Method ${req.method} not allowed, returning 405`)
-    res.setHeader('Allow', 'GET')
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
+  const { request, env } = context
+  const url = new URL(request.url)
+  const origin = request.headers.get('origin')
 
-  // Set CORS headers - restrict to same domain for security (unless debug override is enabled)
-  if (process.env.CORS_ALLOW_ALL === 'true') {
+  // Set CORS headers
+  const headers = new Headers()
+  headers.set('Content-Type', 'application/json')
+  headers.set('Access-Control-Allow-Methods', 'GET')
+  headers.set('Access-Control-Allow-Headers', 'Content-Type')
+
+  if (env.CORS_ALLOW_ALL === 'true') {
     // Debug mode: Allow all origins (insecure - for debugging only)
-    res.setHeader('Access-Control-Allow-Origin', '*')
+    headers.set('Access-Control-Allow-Origin', '*')
     console.log('CORS headers set with wildcard origin (DEBUG MODE - INSECURE)')
   } else {
     // Production mode: Restrict to allowed domains
-    const origin = req.headers.origin
-
     if (origin && allowedOrigins.includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin)
+      headers.set('Access-Control-Allow-Origin', origin)
     } else {
       // For same-origin requests or allowed deployments, use the primary domain
-      res.setHeader('Access-Control-Allow-Origin', 'https://chitchatter.im')
+      headers.set('Access-Control-Allow-Origin', 'https://chitchatter.im')
     }
   }
 
-  res.setHeader('Access-Control-Allow-Methods', 'GET')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
   try {
     // Get TURN server from environment variable with validation
-    const turnServer = getTurnServer()
-
-    // Set content type explicitly
-    res.setHeader('Content-Type', 'application/json')
+    const turnServer = getTurnServer(env)
 
     // Return the TURN server as JSON
-    res.status(200).json(turnServer)
+    return new Response(JSON.stringify(turnServer), {
+      status: 200,
+      headers,
+    })
   } catch (error) {
     console.error('Unexpected error in API handler:', error)
-    res.setHeader('Content-Type', 'application/json')
-    res.status(500).json({ error: 'Internal server error' })
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers,
+    })
   }
 }

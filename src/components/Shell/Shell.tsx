@@ -375,6 +375,7 @@ export const Shell = ({ appNeedsUpdate, children, userPeerId }: ShellProps) => {
     <ShellContext.Provider value={shellContextValue}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+
         {isEnvironmentSupported ? (
           <>
             <UpgradeDialog appNeedsUpdate={appNeedsUpdate} />

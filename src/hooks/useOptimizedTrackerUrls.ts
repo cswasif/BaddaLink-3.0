@@ -26,9 +26,9 @@ export interface UseOptimizedTrackerUrlsReturn {
 }
 
 const TRACKER_OPTIMIZER_CONFIG = {
-  timeout: 3000,
-  maxTrackers: 3,
-  testInterval: 30000, // 30 seconds
+  timeout: 2000, // Reduced timeout for faster response
+  maxTrackers: 2, // Reduced to fewer trackers
+  testInterval: 60000, // Increased to 60 seconds to reduce frequency
   enableBackgroundScan: true,
 }
 
@@ -80,6 +80,15 @@ export function useOptimizedTrackerUrls(
       return optimizedConfig
     }, [])
 
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: QUERY_KEY,
+    queryFn: optimizeTrackers,
+    enabled: enabled && !!optimizerRef.current,
+    staleTime: TRACKER_OPTIMIZER_CONFIG.testInterval,
+    retry: 1,
+    retryDelay: 2000,
+  })
+
   const forceReoptimize = useCallback(async () => {
     if (!optimizerRef.current) return
 
@@ -95,16 +104,7 @@ export function useOptimizedTrackerUrls(
     } finally {
       setIsReoptimizing(false)
     }
-  }, [])
-
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: QUERY_KEY,
-    queryFn: optimizeTrackers,
-    enabled: enabled && !!optimizerRef.current,
-    staleTime: TRACKER_OPTIMIZER_CONFIG.testInterval,
-    retry: 1,
-    retryDelay: 2000,
-  })
+  }, [refetch])
 
   return {
     trackerUrls: data?.urls || defaultTrackerUrls,

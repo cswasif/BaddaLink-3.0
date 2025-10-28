@@ -31,6 +31,7 @@ import { Home } from 'pages/Home'
 import { PrivateRoom } from 'pages/PrivateRoom'
 import { PublicRoom } from 'pages/PublicRoom'
 import { Settings } from 'pages/Settings'
+import { TurnTestPage } from 'pages/TurnTest'
 import { serialization, SerializedUserSettings } from 'services/Serialization'
 import { routerType } from 'config/router'
 
@@ -251,11 +252,7 @@ const Bootstrap = ({
               <Shell appNeedsUpdate={appNeedsUpdate} userPeerId={userId}>
                 <Routes>
                   {[routes.ROOT, routes.INDEX_HTML].map(path => (
-                    <Route
-                      key={path}
-                      path={path}
-                      element={<Home userId={userId} />}
-                    />
+                    <Route key={path} path={path} element={<Home />} />
                   ))}
                   <Route path={routes.ABOUT} element={<About />} />
                   <Route path={routes.DISCLAIMER} element={<Disclaimer />} />
@@ -271,6 +268,7 @@ const Bootstrap = ({
                     path={routes.PRIVATE_ROOM}
                     element={<PrivateRoom userId={userId} />}
                   />
+                  <Route path={routes.TURN_TEST} element={<TurnTestPage />} />
                   <Route
                     path="*"
                     element={<Navigate to={routes.ROOT} replace />}

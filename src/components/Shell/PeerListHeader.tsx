@@ -3,11 +3,13 @@ import { styled } from '@mui/material/styles'
 import IconButton from '@mui/material/IconButton'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ListItem from '@mui/material/ListItem'
+import Box from '@mui/material/Box'
 
 import { routes } from 'config/routes'
 
 import { ConnectionTestResults as IConnectionTestResults } from './useConnectionTest'
 import { ConnectionTestResults } from './ConnectionTestResults'
+import { ConnectionTypeIndicator } from './ConnectionTypeIndicator'
 
 export const StyledHeader = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -45,9 +47,14 @@ export const PeerListHeader = ({
             key={route}
             path={route}
             element={
-              <ConnectionTestResults
-                connectionTestResults={connectionTestResults}
-              />
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <ConnectionTestResults
+                  connectionTestResults={connectionTestResults}
+                />
+                <ConnectionTypeIndicator
+                  connectionTestResults={connectionTestResults}
+                />
+              </Box>
             }
           />
         ))}

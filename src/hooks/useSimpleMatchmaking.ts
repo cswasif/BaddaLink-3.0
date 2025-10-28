@@ -159,7 +159,7 @@ export function useSimpleMatchmaking(
       setIsSearching(false)
       cleanup()
     }
-  }, [isSearching, isMatched, userId, navigate, cleanup])
+  }, [isSearching, isMatched, userId, navigate, cleanup, myPeerId])
 
   // Cancel search
   const cancelSearch = useCallback(() => {

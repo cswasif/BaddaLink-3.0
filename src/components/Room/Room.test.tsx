@@ -34,9 +34,9 @@ global.fetch = vi.fn().mockResolvedValue({
     get: vi.fn().mockReturnValue('application/json'),
   },
   json: vi.fn().mockResolvedValue({
-    urls: ['turn:relay1.expressturn.com:3478'],
-    username: 'efQUQ79N77B5BNVVKF',
-    credential: 'N4EAUgpjMzPLrxSS',
+    urls: ['turn:relay1.expressturn.com:3480'],
+    username: '000000002073803445',
+    credential: '3iSwN8gOD2f0gLPEIw3MJCm6sRw=',
   }),
 })
 

@@ -137,14 +137,35 @@ const fetchTurnServer = async (): Promise<RTCIceServer> => {
 
     const data = await response.json()
 
-    // Validate the response structure using type guard
-    if (!isRTCIceServer(data)) {
+    // Handle both single RTCIceServer and complete RTCConfiguration responses
+    let turnServer: RTCIceServer
+
+    if (data.iceServers && Array.isArray(data.iceServers)) {
+      // Response is a complete RTCConfiguration - extract the first suitable server
+      const suitableServer = data.iceServers.find((server: any) => {
+        const urls = Array.isArray(server.urls) ? server.urls : [server.urls]
+        return urls.some(
+          (url: string) => url.startsWith('turn:') || url.startsWith('stun:')
+        )
+      })
+
+      if (!suitableServer) {
+        throw new Error(
+          'No suitable TURN/STUN server found in RTC configuration'
+        )
+      }
+
+      turnServer = suitableServer
+    } else if (isRTCIceServer(data)) {
+      // Response is a single RTCIceServer (original format)
+      turnServer = data
+    } else {
       throw new Error(
-        'Invalid TURN server response: malformed RTCIceServer object'
+        'Invalid TURN server response: expected RTCIceServer or RTCConfiguration object'
       )
     }
 
-    return data
+    return turnServer
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
       console.error('Network error fetching TURN server:', error.message)

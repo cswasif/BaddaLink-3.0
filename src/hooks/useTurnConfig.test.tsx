@@ -13,9 +13,9 @@ const mockEnhancedConnectivity = vi.hoisted(() => ({
 vi.mock('config/enhancedConnectivity', () => mockEnhancedConnectivity)
 
 const mockTurnServer = {
-  urls: ['turn:relay1.expressturn.com:3478'],
-  username: 'efQUQ79N77B5BNVVKF',
-  credential: 'N4EAUgpjMzPLrxSS',
+  urls: ['turn:relay1.expressturn.com:3480'],
+  username: '000000002073803445',
+  credential: '3iSwN8gOD2f0gLPEIw3MJCm6sRw=',
 }
 
 const createTestQueryClient = () =>
@@ -179,8 +179,8 @@ describe('useTurnConfig', () => {
 
     const validTurnServerWithArray = {
       urls: [
-        'turn:relay1.expressturn.com:3478',
-        'turn:relay2.expressturn.com:3478',
+        'turn:relay1.expressturn.com:3480',
+        'turn:relay2.expressturn.com:3480',
       ],
       username: 'testuser',
       credential: 'testpass',
@@ -212,7 +212,7 @@ describe('useTurnConfig', () => {
     const wrapper = createWrapper(queryClient)
 
     const minimalTurnServer = {
-      urls: ['turn:relay1.expressturn.com:3478'],
+      urls: ['turn:relay1.expressturn.com:3480'],
     }
 
     global.fetch = vi.fn().mockResolvedValue({

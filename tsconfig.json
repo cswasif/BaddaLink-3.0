@@ -19,7 +19,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "trystero/torrent": ["../node_modules/trystero/src/torrent.d.ts"]
+      "trystero/torrent": ["../node_modules/trystero/src/torrent.d.ts"],
+      "hooks/*": ["./hooks/*"]
     },
     "types": ["vite-plugin-pwa/client", "vite/client", "vitest/globals"]
   },

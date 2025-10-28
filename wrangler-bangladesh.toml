@@ -1,0 +1,9 @@
+name = "baddalink-stun-api-bd"
+main = "workers/simple-api-bangladesh.js"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "baddalink-stun-api-bd"
+
+[env.production.vars]
+CORS_ALLOW_ALL = "false"

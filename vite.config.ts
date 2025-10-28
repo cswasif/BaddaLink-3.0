@@ -25,9 +25,10 @@ const srcPaths = [
   'img',
   'utils',
   'test-utils',
+  'styles',
 ]
 
-const srcPathAliases = srcPaths.reduce((acc, dir) => {
+const srcPathAliases = srcPaths.reduce<Record<string, string>>((acc, dir) => {
   acc[dir] = path.resolve(__dirname, `./src/${dir}`)
   return acc
 }, {})
@@ -54,6 +55,12 @@ const config = () => {
       // for exposing source code to users.
       // See: https://github.com/vitejs/vite/issues/15012#issuecomment-1956429165
       sourcemap: true,
+      // Fix for Cloudflare Pages deployment
+      rollupOptions: {
+        output: {
+          format: 'es',
+        },
+      },
     },
     plugins: [
       svgr({

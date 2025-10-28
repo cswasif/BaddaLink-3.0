@@ -45,9 +45,9 @@ describe('/api/get-config', () => {
 
   // Fallback TURN server (matches the fallback in the handler)
   const fallbackTurnServer = {
-    urls: ['turn:relay1.expressturn.com:3478'],
-    username: 'efQUQ79N77B5BNVVKF',
-    credential: 'N4EAUgpjMzPLrxSS',
+    urls: ['turn:relay1.expressturn.com:3480'],
+    username: '000000002073803445',
+    credential: '3iSwN8gOD2f0gLPEIw3MJCm6sRw=',
   }
 
   beforeEach(() => {

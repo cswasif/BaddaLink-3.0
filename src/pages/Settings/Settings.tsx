@@ -7,10 +7,15 @@ import Paper from '@mui/material/Paper'
 import useTheme from '@mui/material/styles/useTheme'
 import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import { ChangeEvent, useContext, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import FileReaderInput, { Result } from 'react-file-reader-input'
 
 import { ConfirmDialog } from 'components/ConfirmDialog'
+import { ColorMode } from 'models/settings'
+import { routes } from 'config/routes'
 import { EnhancedConnectivityControl } from 'components/EnhancedConnectivityControl'
 import { PeerNameDisplay } from 'components/PeerNameDisplay'
 import { SoundSelector } from 'components/SoundSelector/SoundSelector'
@@ -20,6 +25,12 @@ import { ShellContext } from 'contexts/ShellContext'
 import { StorageContext } from 'contexts/StorageContext'
 import { notification } from 'services/Notification'
 import { settings } from 'services/Settings'
+
+import {
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon,
+  Water as WaterIcon,
+} from '@mui/icons-material'
 
 import { isErrorWithMessage } from '../../lib/type-guards'
 
@@ -43,7 +54,19 @@ export const Settings = ({ userId }: SettingsProps) => {
     showNotificationOnNewMessage,
     showActiveTypingStatus,
     isEnhancedConnectivityEnabled,
+    colorMode,
   } = getUserSettings()
+
+  const handleThemeChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newColorMode: ColorMode | null
+  ) => {
+    console.log('handleThemeChange called with:', newColorMode)
+    if (newColorMode !== null) {
+      console.log('Updating theme to:', newColorMode)
+      updateUserSettings({ colorMode: newColorMode })
+    }
+  }
 
   const persistedStorage = getPersistedStorage()
 
@@ -147,6 +170,38 @@ export const Settings = ({ userId }: SettingsProps) => {
       >
         Chat
       </Typography>
+      <Typography
+        variant="h2"
+        sx={{
+          fontSize: theme.typography.h3.fontSize,
+          fontWeight: theme.typography.fontWeightMedium,
+          mb: 2,
+        }}
+      >
+        Appearance
+      </Typography>
+      <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          Choose your preferred theme:
+        </Typography>
+        <ToggleButtonGroup
+          value={colorMode}
+          exclusive
+          onChange={handleThemeChange}
+          aria-label="theme selection"
+        >
+          <ToggleButton value={ColorMode.LIGHT} aria-label="light theme">
+            <LightModeIcon sx={{ mr: 1 }} /> Light
+          </ToggleButton>
+          <ToggleButton value={ColorMode.DARK} aria-label="dark theme">
+            <DarkModeIcon sx={{ mr: 1 }} /> Dark
+          </ToggleButton>
+          <ToggleButton value={ColorMode.OCEANIC} aria-label="oceanic theme">
+            <WaterIcon sx={{ mr: 1 }} /> Oceanic
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Paper>
+
       <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
         <Typography>When a message is received in the background:</Typography>
         <FormGroup>
@@ -211,6 +266,18 @@ export const Settings = ({ userId }: SettingsProps) => {
             onChange={handleIsEnhancedConnectivityEnabledChange}
             variant="subtitle2"
           />
+          <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
+            <Link
+              to={routes.TURN_TEST}
+              style={{ color: theme.palette.primary.main }}
+            >
+              🔄 Test TURN Server Configuration
+            </Link>
+          </Typography>
+          <Typography variant="caption" display="block" sx={{ mb: 2 }}>
+            Force TURN-only connections to verify your relay server is working
+            correctly
+          </Typography>
           <Divider sx={{ my: 2 }} />
         </>
       )}
